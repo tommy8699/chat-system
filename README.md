@@ -48,16 +48,16 @@
 ### phpMyAdmin
 - URL: http://localhost:8080
 - Server: `db`
-- Username: `refactorian`
-- Password: `refactorian`
-- Database: `refactorian`
+- Username: `laravel`
+- Password: `root`
+- Database: `root`
 
 ### Adminer
 - URL: http://localhost:9090
 - Server: `db`
-- Username: `refactorian`
-- Password: `refactorian`
-- Database: `refactorian`
+- Username: `laravel`
+- Password: `root`
+- Database: `root`
 
 ### Basic docker compose commands
 - Build or rebuild services
