@@ -49,14 +49,49 @@ class MessageController extends Controller
         return response()->json($message, 201);
     }
 
-    public function reply(Request $request, Message $message)
+    public function storeFlat(Request $request)
     {
-        $chat = $message->chat;
+        $validated = $request->validate([
+            'chat_id'   => 'required|exists:chats,id',
+            'message'   => 'required|string',
+            'file'      => 'nullable|file|max:10240',
+        ]);
+
+        // Načítaj chat aj s používateľmi
+        $chat = Chat::with('users')->find($validated['chat_id']);
 
         if (!$chat->users->contains(Auth::id())) {
-            return response()->json(['message' => 'Forbidden'], 403);
+            return response()->json(['message' => 'Forbidden (not in chat)'], 403);
         }
 
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('chat_files', 'public');
+        }
+
+        $message = $chat->messages()->create([
+            'user_id'   => Auth::id(),
+            'message'   => $validated['message'],
+            'file_path' => $filePath,
+        ]);
+
+        return response()->json($message, 201);
+    }
+
+    public function reply(Request $request, Message $message)
+    {
+        // Overenie členstva v chate cez whereHas
+        $chat = Chat::where('id', $message->chat_id)
+            ->whereHas('users', function ($query) {
+                $query->where('users.id', Auth::id());
+            })
+            ->first();
+
+        if (!$chat) {
+            return response()->json(['message' => 'Forbidden (not in chat)'], 403);
+        }
+
+        // Validácia vstupu
         $validated = $request->validate([
             'message'   => 'required|string',
             'file'      => 'nullable|file|max:10240',
