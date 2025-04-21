@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id(); // bigint unsigned auto increment
+        Schema::create('chats', function (Blueprint $table) {
+            $table->id();
             $table->string('name')->nullable();
-            $table->string('email')->unique()->nullable();
-            $table->string('password')->nullable();
-            $table->timestamps(); // created_at, updated_at
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('chats');
     }
 };
